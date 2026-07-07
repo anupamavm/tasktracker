@@ -47,9 +47,7 @@ export default function Dashboard() {
 	const handleSaveTask = async (taskData: any) => {
 		try {
 			const method = editingTask ? "PUT" : "POST";
-			const url = editingTask
-				? `http://localhost:8080/api/tasks/${editingTask.id}`
-				: "http://localhost:8080/api/tasks";
+			const url = editingTask ? `/api/tasks/${editingTask.id}` : "/api/tasks";
 
 			const res = await fetch(url, {
 				method,
@@ -73,7 +71,7 @@ export default function Dashboard() {
 	const handleDeleteTask = async (id: number) => {
 		if (!confirm("Are you sure you want to delete this task?")) return;
 		try {
-			const res = await fetch(`http://localhost:8080/api/tasks/${id}`, {
+			const res = await fetch(`/api/tasks/${id}`, {
 				method: "DELETE",
 				headers: { Authorization: `Bearer ${token}` },
 			});

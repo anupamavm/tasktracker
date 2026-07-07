@@ -48,7 +48,12 @@ export default function TaskModal({
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
-		onSave({ title, description, status, dueDate });
+		onSave({
+			title,
+			description,
+			status,
+			...(dueDate ? { dueDate } : {}),
+		});
 	};
 
 	return (
