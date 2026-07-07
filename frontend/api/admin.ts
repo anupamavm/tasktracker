@@ -16,12 +16,8 @@ export async function updateUserRole(
 
 	if (!res.ok) {
 		let msg = res.statusText;
-		try {
-			const body = await res.json();
-			msg = body.message || JSON.stringify(body);
-		} catch {
-			// ignore
-		}
+		const body = await res.json();
+		msg = body.message || JSON.stringify(body);
 		throw new Error(msg || `Request failed: ${res.status}`);
 	}
 
