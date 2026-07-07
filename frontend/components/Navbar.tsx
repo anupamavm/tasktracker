@@ -19,9 +19,15 @@ export default function Navbar() {
 					</span>
 				</div>
 				<div className="flex items-center gap-4">
+					{role === "ADMIN" ? (
+						<a
+							href="/admin"
+							className="text-sm font-medium text-zinc-600 hover:text-zinc-900 transition-colors">
+							Admin Panel
+						</a>
+					) : null}
 					<span className="text-sm text-zinc-500">
-						Welcome,{" "}
-						<span className="font-medium text-zinc-800">{username}</span>
+						<span className="font-medium text-red-800">{username}</span>
 					</span>
 					<button
 						onClick={logout}
