@@ -29,12 +29,4 @@ public class AuthController {
         return ResponseEntity.ok(authService.login(request));
     }
 
-    @PutMapping("/{id}/role")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> updateUserRole(
-            @PathVariable Long id,
-            @RequestParam Role newRole) {
-        authService.updateUserRole(id, newRole);
-        return ResponseEntity.noContent().build();
-    }
 }
