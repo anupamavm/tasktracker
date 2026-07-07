@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
+import { register as apiRegister } from "@/api/user";
 
 export default function RegisterPage() {
 	const [username, setUsername] = useState("");
@@ -15,13 +16,7 @@ export default function RegisterPage() {
 		e.preventDefault();
 		setError("");
 		try {
-			const res = await fetch("/api/auth/register", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ username, email, password }),
-			});
-			if (!res.ok) throw new Error("Registration details rejected.");
-			const data = await res.json();
+			const data = await apiRegister(username, email, password);
 			login(data.token, data.username, data.role);
 		} catch (err: any) {
 			setError(err.message || "Registration failed");

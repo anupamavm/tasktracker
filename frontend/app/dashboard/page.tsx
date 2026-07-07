@@ -1,68 +1,67 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
+import {
+	fetchTasks as apiFetchTasks,
+	saveTask as apiSaveTask,
+	deleteTask as apiDeleteTask,
+} from "@/api/tasks";
 import Navbar from "@/components/Navbar";
 import TaskCard from "@/components/TaskCard";
 import TaskModal from "@/components/TaskModal";
+import SockJS from "sockjs-client";
+import { Client } from "@stomp/stompjs";
 
 export default function Dashboard() {
 	const { token, isAuthenticated } = useAuth();
-	const [tasks, setTasks] = useState([]);
+	const [tasks, setTasks] = useState<any[]>([]);
 	const [statusFilter, setStatusFilter] = useState("");
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [editingTask, setEditingTask] = useState<any>(null);
+	const stompClientRef = useRef<Client | null>(null);
 
-	const fetchTasks = async () => {
-		if (!token) return;
-		try {
-			const url = statusFilter
-				? `/api/tasks?status=${statusFilter}`
-				: "/api/tasks";
-			const res = await fetch(url, {
-				headers: { Authorization: `Bearer ${token}` },
-			});
-			const data = await res.json();
-			setTasks(data.content || []);
-		} catch (err) {
-			console.error("Error fetching tasks:", err);
-		}
-	};
+	const fetchTasks = useCallback(async () => {
+		const data = await apiFetchTasks(token, statusFilter);
+		setTasks(data || []);
+	}, [token, statusFilter]);
 
 	useEffect(() => {
-		if (isAuthenticated) {
-			fetchTasks();
-		}
-	}, [token, statusFilter, isAuthenticated]);
+		if (!isAuthenticated || !token) return;
 
-	// Establish WebSocket connection for Real-Time Updates
-	useEffect(() => {
-		if (!isAuthenticated) return;
+		void fetchTasks();
 
-		// Simple execution using fallback long-polling mechanism checking every 5 seconds to match SockJS synchronization
-		const pollInterval = setInterval(fetchTasks, 5000);
-		return () => clearInterval(pollInterval);
-	}, [token, statusFilter, isAuthenticated]);
+		const client = new Client({
+			webSocketFactory: () =>
+				new SockJS(
+					`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/ws`,
+				),
+			debug: () => {},
+			onConnect: () => {
+				client.subscribe("/topic/tasks", () => {
+					void fetchTasks();
+				});
+			},
+			onStompError: (frame) => {
+				console.error("STOMP error:", frame.headers["message"]);
+			},
+		});
+
+		client.activate();
+		stompClientRef.current = client;
+
+		return () => {
+			client.deactivate();
+			stompClientRef.current = null;
+		};
+	}, [isAuthenticated, token, fetchTasks]);
 
 	const handleSaveTask = async (taskData: any) => {
 		try {
-			const method = editingTask ? "PUT" : "POST";
-			const url = editingTask ? `/api/tasks/${editingTask.id}` : "/api/tasks";
-
-			const res = await fetch(url, {
-				method,
-				headers: {
-					"Content-Type": "application/json",
-					Authorization: `Bearer ${token}`,
-				},
-				body: JSON.stringify(taskData),
-			});
-
-			if (res.ok) {
-				setIsModalOpen(false);
-				setEditingTask(null);
-				fetchTasks();
-			}
+			await apiSaveTask(token, taskData, editingTask?.id);
+			setIsModalOpen(false);
+			setEditingTask(null);
+			fetchTasks();
 		} catch (err) {
 			console.error("Error saving task:", err);
 		}
@@ -71,11 +70,8 @@ export default function Dashboard() {
 	const handleDeleteTask = async (id: number) => {
 		if (!confirm("Are you sure you want to delete this task?")) return;
 		try {
-			const res = await fetch(`/api/tasks/${id}`, {
-				method: "DELETE",
-				headers: { Authorization: `Bearer ${token}` },
-			});
-			if (res.ok) fetchTasks();
+			await apiDeleteTask(token, id);
+			fetchTasks();
 		} catch (err) {
 			console.error("Error deleting task:", err);
 		}

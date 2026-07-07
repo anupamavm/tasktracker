@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
+import { login as apiLogin } from "@/api/user";
 
 export default function LoginPage() {
 	const [username, setUsername] = useState("");
@@ -14,13 +15,7 @@ export default function LoginPage() {
 		e.preventDefault();
 		setError("");
 		try {
-			const res = await fetch("/api/auth/login", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ username, password }),
-			});
-			if (!res.ok) throw new Error("Invalid username or password");
-			const data = await res.json();
+			const data = await apiLogin(username, password);
 			login(data.token, data.username, data.role);
 		} catch (err: any) {
 			setError(err.message || "An error occurred");
