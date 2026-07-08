@@ -40,11 +40,9 @@ jobs:
           chmod +x mvnw
           ./mvnw clean verify
         env:
-          DB_LOCAL_PORT: 5433
-          DB_NAME: task_tracker_db
-          DB_USER: postgres
-          DB_PASSWORD: postgres
-          JWT_SECRET: CI_ENVIRONMENT_TEMPORARY_TESTING_SECRET_KEY_MUST_BE_LONG_ENOUGH
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5433/task_tracker_db
+          SPRING_DATASOURCE_USERNAME: postgres
+          SPRING_DATASOURCE_PASSWORD: postgres
 
   frontend-ci:
     name: Frontend CI (Node.js / Next.js)
