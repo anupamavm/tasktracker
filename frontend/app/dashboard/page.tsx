@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import {
 	fetchTasks as apiFetchTasks,
@@ -14,6 +15,7 @@ import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
 
 export default function Dashboard() {
+	const router = useRouter();
 	const { token, isAuthenticated } = useAuth();
 	const [tasks, setTasks] = useState<any[]>([]);
 	const [statusFilter, setStatusFilter] = useState("");

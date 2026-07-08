@@ -36,7 +36,7 @@ public class AuthService {
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .role(Role.USER) // First user can be made admin manually
+                .role(Role.USER)
                 .build();
 
         userRepository.save(user);

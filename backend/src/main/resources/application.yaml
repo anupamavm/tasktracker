@@ -19,3 +19,9 @@ spring:
 
 jwt:
   secret: "TEMPORARY_TESTING_SECRET_KEY_MUST_BE_LONG_ENOUGH"
+
+app:
+  superadmin:
+    username: ${APP_SUPERADMIN_USERNAME:superadmin}
+    email: ${APP_SUPERADMIN_EMAIL:superadmin@tasktracker.com}
+    password: ${APP_SUPERADMIN_PASSWORD:Admin123!}

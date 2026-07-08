@@ -39,7 +39,7 @@ public class TaskService {
     }
 
     public Page<TaskResponse> getTasks(User currentUser, TaskStatus status, Long ownerId, Pageable pageable) {
-        if (currentUser.getRole() == Role.ADMIN) {
+        if (currentUser.getRole() == Role.ADMIN || currentUser.getRole() == Role.SUPERADMIN)  {
             return taskRepository.findByFilters(ownerId, status, pageable).map(this::mapToResponse);
         } else {
             return taskRepository.findByFilters(currentUser.getId(), status, pageable).map(this::mapToResponse);
@@ -50,7 +50,7 @@ public class TaskService {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found"));
 
-        if (currentUser.getRole() != Role.ADMIN && !task.getOwner().getId().equals(currentUser.getId())) {
+        if (currentUser.getRole() != Role.ADMIN &&  currentUser.getRole() != Role.SUPERADMIN && !task.getOwner().getId().equals(currentUser.getId())) {
             throw new AccessDeniedException("You do not have permission to view this task");
         }
 
@@ -61,7 +61,7 @@ public class TaskService {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found"));
 
-        if (currentUser.getRole() != Role.ADMIN && !task.getOwner().getId().equals(currentUser.getId())) {
+        if (currentUser.getRole() != Role.ADMIN &&  currentUser.getRole() != Role.SUPERADMIN && !task.getOwner().getId().equals(currentUser.getId())) {
             throw new AccessDeniedException("You do not have permission to update this task");
         }
 
@@ -81,7 +81,7 @@ public class TaskService {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found"));
 
-        if (currentUser.getRole() != Role.ADMIN && !task.getOwner().getId().equals(currentUser.getId())) {
+        if (currentUser.getRole() != Role.ADMIN &&  currentUser.getRole() != Role.SUPERADMIN && !task.getOwner().getId().equals(currentUser.getId())) {
             throw new AccessDeniedException("You do not have permission to delete this task");
         }
 

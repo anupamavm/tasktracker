@@ -10,9 +10,9 @@ interface Task {
 }
 
 interface TaskCardProps {
-	task: Task;
-	onEdit: (task: Task) => void;
-	onDelete: (id: number) => void;
+	readonly task: Task;
+	readonly onEdit: (task: Task) => void;
+	readonly onDelete: (id: number) => void;
 }
 
 export default function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
@@ -46,14 +46,15 @@ export default function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
 							{task.dueDate || "No date"}
 						</span>
 					</p>
-					{role === "ADMIN" && (
-						<p className="mt-0.5">
-							Owner:{" "}
-							<span className="font-medium text-zinc-600">
-								{task.ownerUsername}
-							</span>
-						</p>
-					)}
+					{role === "ADMIN" ||
+						(role === "SUPERADMIN" && (
+							<p className="mt-0.5">
+								Owner:{" "}
+								<span className="font-medium text-zinc-600">
+									{task.ownerUsername}
+								</span>
+							</p>
+						))}
 				</div>
 				<div className="flex gap-3">
 					<button
