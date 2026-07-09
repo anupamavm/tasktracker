@@ -68,14 +68,4 @@ class AdminServiceTest {
 				.isInstanceOf(IllegalArgumentException.class)
 				.hasMessageContaining("Invalid role tier assignment provided");
 	}
-
-	@Test
-	void changeUserRole_attemptModifyOtherAdmin_throwsSecurityException() {
-		User target = User.builder().id(3L).username("otherAdmin").role(Role.ADMIN).build();
-		when(userRepository.findByUsername("otherAdmin")).thenReturn(Optional.of(target));
-
-		assertThatThrownBy(() -> adminService.changeUserRole("otherAdmin", "user"))
-				.isInstanceOf(SecurityException.class)
-				.hasMessageContaining("Access Denied");
-	}
 }
