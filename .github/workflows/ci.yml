@@ -34,7 +34,7 @@ jobs:
 
       - name: Verify Database Core Readiness
         run: |
-          echo "Waiting for PostgreSQL database"
+          echo "Waiting for PostgreSQL database to be fully operational..."
           docker exec test_db sh -c 'until pg_isready -U postgres; do sleep 1; done'
           echo "PostgreSQL is online and fully operational."
 
