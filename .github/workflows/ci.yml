@@ -15,12 +15,13 @@ jobs:
       - name: Checkout Code Matrix
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           java-version: "21"
           distribution: "temurin"
           cache: "maven"
+          cache-dependency-path: "backend/pom.xml"
 
       - name: Launch Test Database Engine
         run: |
@@ -31,8 +32,19 @@ jobs:
             -p 5433:5432 \
             postgres:16
 
-          # Give Postgres a brief moment to accept incoming socket handshakes
-          sleep 3
+      - name: Verify Database Core Readiness
+        run: |
+          echo "Waiting for PostgreSQL database engine socket to fully accept handshakes..."
+          docker exec test_db sh -c 'until pg_isready -U postgres; do sleep 1; done'
+          echo "PostgreSQL is online and fully operational."
+
+      - name: Inject Environment Variables for Dotenv Setup
+        run: |
+          cd backend
+          echo "DB_URL=jdbc:postgresql://localhost:5433/task_tracker_db" > .env
+          echo "DB_USERNAME=postgres" >> .env
+          echo "DB_PASSWORD=postgres" >> .env
+          echo "JWT_SECRET=CI_CD_PIPELINE_TEMPORARY_TESTING_SECRET_KEY_32_BYTES_LONG_MIN" >> .env
 
       - name: Compile and Execute Unit/Integration Tests
         run: |
